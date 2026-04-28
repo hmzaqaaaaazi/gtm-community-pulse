@@ -1,6 +1,6 @@
 # GTM Community Pulse
 
-Pulls posts and comments from r/gtmengineering and r/ClaudeGTM, runs them through Claude Sonnet to extract signals, and lets you query the results from a CLI.
+Pulls posts and comments from r/gtmengineering and r/ClaudeGTM, runs them through an LLM to extract signals, and lets you query the results from a CLI.
 
 ## What it does
 
@@ -21,7 +21,7 @@ Reddit API → Ingestor → SQLite → Enricher (Claude Sonnet) → Enriched DB 
 - Python
 - SQLite
 - Docker
-- Claude Sonnet API (claude-sonnet-4-6)
+- OpenAI API (gpt-5.4-mini)
 - Reddit Public JSON API
 
 ## Project Structure
@@ -59,7 +59,7 @@ gtm-community-pulse/
 
 ## Requirements
 
-Docker and an Anthropic API key.
+Docker and an OpenAI API key.
 
 ## Example Queries
 
@@ -75,9 +75,9 @@ What is the community saying about AI SDRs?
 
 The ingestor hits Reddit's public JSON API with a custom user agent and no authentication required. It paginates through posts using the `after` token and fetches the top 10 comments for each post. It sleeps one second between every API call. Each run checks the latest stored timestamp and only pulls what is new.
 
-The enricher reads posts where `enriched = 0`, builds a text block from the title, body, and comments, and sends it to Claude Sonnet with a prompt that requires raw JSON back. Claude extracts tools mentioned with context, skill names, project ideas with complexity and replicability flags, job signals by type, a post category, a one sentence key insight, and a GTM relevance score. Results go into the enriched table and the post is flagged as done.
+The enricher reads posts where `enriched = 0`, builds a text block from the title, body, and comments, and sends it to the LLM with a prompt that requires raw JSON back. It extracts tools mentioned with context, skill names, project ideas with complexity and replicability flags, job signals by type, a post category, a one sentence key insight, and a GTM relevance score. Results go into the enriched table and the post is flagged as done.
 
-The query CLI extracts keywords from the question, filters out stop words, and runs a SQL search across post titles, bodies, key insights, tools, skills, and project ideas. It takes the top 15 results ordered by relevance score, formats each into a compact block, and sends the full context to Claude Sonnet. Claude answers the question directly and names the posts that support its answer.
+The query CLI extracts keywords from the question, filters out stop words, and runs a SQL search across post titles, bodies, key insights, tools, skills, and project ideas. It takes the top 15 results ordered by relevance score, formats each into a compact block, and sends the full context to the LLM. It answers the question directly and names the posts that support its answer.
 
 ## Why I Built This
 
