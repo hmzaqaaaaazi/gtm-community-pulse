@@ -6,14 +6,14 @@ Pulls posts and comments from r/gtmengineering and r/ClaudeGTM, runs them throug
 
 The ingestor fetches posts and top comments from two GTM engineering subreddits using Reddit's public JSON API. It stores everything in a local SQLite database. On the first run it pulls the full post history. On later runs it only fetches posts newer than what is already stored.
 
-The enricher reads each unenriched post, combines the title, body, and comments into a single text block, and sends it to Claude Sonnet. Claude returns structured JSON with tools mentioned, skills, project ideas, job signals, a category, a one sentence insight, and a relevance score from 1 to 10. All of that goes into a separate enriched table and the post is marked as done.
+The enricher reads each unenriched post, combines the title, body, and comments into a single text block, and sends it to the LLM. It returns structured JSON with tools mentioned, skills, project ideas, job signals, a category, a one sentence insight, and a relevance score from 1 to 10. All of that goes into a separate enriched table and the post is marked as done.
 
 The query interface is a CLI loop. You type a question and it searches the enriched database for matching posts, builds a compact context block from the extracted signals, and sends everything to Claude Sonnet. You get a direct answer with citations to the specific posts it drew from.
 
 ## Architecture
 
 ```
-Reddit API → Ingestor → SQLite → Enricher (Claude Sonnet) → Enriched DB → RAG Query CLI → Claude Sonnet → Answer
+Reddit API → Ingestor → SQLite → Enricher (LLM) → Enriched DB → RAG Query CLI → LLM → Answer
 ```
 
 ## Stack
@@ -53,7 +53,7 @@ gtm-community-pulse/
 ## Setup
 
 1. Clone the repo
-2. Copy `.env.example` to `.env` and fill in your Anthropic API key
+2. Copy `.env.example` to `.env` and fill in your OpenAI API key
 3. Run: `docker-compose up --build`
 4. To ask questions: `docker-compose run rag`
 
