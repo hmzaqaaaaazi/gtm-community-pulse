@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  ingestor:
+    build: ./ingestor
+    restart: always
+    env_file: .env
+    environment:
+      - DB_PATH=/data/gtm.db
+      - SCHEMA_PATH=/schema/init.sql
+      - SUBREDDITS=gtmengineering,ClaudeGTM
+    volumes:
+      - gtm-data:/data
+      - ./schema:/schema:ro
+
+  enricher:
+    build: ./enricher
+    depends_on:
+      - ingestor
+    env_file: .env
+    environment:
+      - DB_PATH=/data/gtm.db
+      - SCHEMA_PATH=/schema/init.sql
+      - SUBREDDITS=gtmengineering,ClaudeGTM
+    volumes:
+      - gtm-data:/data
+      - ./schema:/schema:ro
+
+  rag:
+    build: ./rag
+    depends_on:
+      - enricher
+    stdin_open: true
+    tty: true
+    env_file: .env
+    environment:
+      - DB_PATH=/data/gtm.db
+    volumes:
+      - gtm-data:/data
+
+volumes:
+  gtm-data:
